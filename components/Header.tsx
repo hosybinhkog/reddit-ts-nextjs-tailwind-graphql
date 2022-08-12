@@ -12,10 +12,13 @@ import {
   SpeakerphoneIcon,
   VideoCameraIcon,
 } from "@heroicons/react/outline";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const Header = () => {
+  const { data: session } = useSession();
+
   return (
-    <header className="w-full fixed top-0 z-50 flex items-center px-4 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 flex items-center px-4 bg-white shadow-sm">
       <div className="relative h-10 w-20 cursor-pointer flex-shrink-0">
         <Image
           objectFit="contain"
@@ -54,18 +57,47 @@ const Header = () => {
         <MenuIcon className="icon" />
       </div>
 
+      {/* SESSION */}
       {/* Action Login && Logout */}
-      <div className="hidden lg:flex lg:items-center cursor-pointer space-x-2 border border-gray-100 p-2">
-        <div className="relative h-5 w-5  flex-shrink-0">
-          <Image
-            src="https://links.papareact.com/23l"
-            alt="images"
-            layout="fill"
-            objectFit="contain"
-          />
+      {session ? (
+        <div
+          onClick={() => signOut()}
+          className="hidden lg:flex lg:items-center cursor-pointer space-x-2 border border-gray-100 p-2"
+        >
+          <div className="relative h-5 w-5  flex-shrink-0">
+            <Image
+              src={`${
+                session.user?.image
+                  ? session.user.image
+                  : "https://links.papareact.com/23l"
+              }`}
+              alt="images"
+              layout="fill"
+              objectFit="contain"
+            />
+          </div>
+          <div className="flex-1 text-xs">
+            <p className="truncate">{session.user?.name}</p>
+            <p className="text-gray-400">Sign Out</p>
+          </div>
+          <ChevronDownIcon className="w-5 text-gray-500 h-5" />
         </div>
-        <p className="text-gray-400">Sign In</p>
-      </div>
+      ) : (
+        <div
+          onClick={() => signIn()}
+          className="hidden lg:flex lg:items-center cursor-pointer space-x-2 border border-gray-100 p-2"
+        >
+          <div className="relative h-5 w-5  flex-shrink-0">
+            <Image
+              src="https://links.papareact.com/23l"
+              alt="images"
+              layout="fill"
+              objectFit="contain"
+            />
+          </div>
+          <p className="text-gray-400">Sign In</p>
+        </div>
+      )}
     </header>
   );
 };
