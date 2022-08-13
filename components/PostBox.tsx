@@ -3,10 +3,11 @@ import { LinkIcon, PhotographIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { ADD_POST } from "../graphql/mutation";
+import { ADD_POST, ADD_SUBREDDIT } from "../graphql/mutation";
 import Avatar from "./Avatar";
 import client from "../apollo-client";
-import { GET_SUBREDDIT_BY_TOPIC } from "../graphql/queries";
+import { GET_ALL_POSTS, GET_SUBREDDIT_BY_TOPIC } from "../graphql/queries";
+import toast from "react-hot-toast";
 
 interface FormData {
   postTitle: string;
@@ -17,7 +18,10 @@ interface FormData {
 
 const PostBox = () => {
   const { data: session } = useSession();
-  const [addPost] = useMutation(ADD_POST);
+  const [addPost] = useMutation(ADD_POST, {
+    refetchQueries: [GET_ALL_POSTS, "getPostList"],
+  });
+  const [addSubreddit] = useMutation(ADD_SUBREDDIT);
   const [imageBoxOpen, setImageBoxOpen] = useState<boolean>(false);
   const {
     register,
@@ -29,7 +33,7 @@ const PostBox = () => {
 
   const onSubmitFormSearch = handleSubmit(async (formData) => {
     console.log(formData);
-
+    const notification = toast.loading("Creating new post...");
     try {
       const {
         data: { getSubredditListByTopic },
@@ -43,9 +47,65 @@ const PostBox = () => {
       const subredditExists = getSubredditListByTopic.length > 0;
 
       if (!subredditExists) {
+        console.log("Create new subreddit");
+        const image = formData.postImage || "";
+
+        const {
+          data: { insertSubreddit: newSubreddit },
+        } = await addSubreddit({
+          variables: {
+            topic: formData.subreddit,
+          },
+        });
+
+        const {
+          data: { insertPost: newPost },
+        } = await addPost({
+          variables: {
+            image,
+            subreddit_id: newSubreddit.id,
+            body: formData.postBody,
+            title: formData.postTitle,
+            username: session?.user?.name,
+          },
+        });
+
+        console.log("NEWPOST :====: ", { newPost });
       } else {
+        console.log("SUBREDDIT EXISTING.... ");
+        console.log(getSubredditListByTopic);
+
+        const image = formData.postImage || "";
+
+        const {
+          data: { insertPost: newPost },
+        } = await addPost({
+          variables: {
+            image,
+            body: formData.postBody,
+            title: formData.postTitle,
+            username: session?.user?.name,
+            subreddit_id: getSubredditListByTopic[0].id,
+          },
+        });
+
+        console.log("create new post subreddit is exsist " + { newPost });
       }
-    } catch (error) {}
+
+      setValue("postBody", "");
+      setValue("postImage", "");
+      setValue("postTitle", "");
+      setValue("subreddit", "");
+
+      toast.success("Create a new post successfully...!", {
+        id: notification,
+      });
+    } catch (error) {
+      console.log("Error to addpost " + error);
+      toast.error("Error to create new post...", {
+        id: notification,
+      });
+    }
   });
 
   return (
