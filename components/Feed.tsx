@@ -1,10 +1,6 @@
 import { useQuery } from "@apollo/client";
 import React from "react";
-import {
-  GET_ALL_POSTS,
-  GET_ALL_POST_BY_TOPIC,
-  GET_VOTE_LIST,
-} from "../graphql/queries";
+import { GET_ALL_POSTS, GET_ALL_POST_BY_TOPIC } from "../graphql/queries";
 import Post from "./Post";
 
 interface FeedProps {
@@ -12,11 +8,9 @@ interface FeedProps {
 }
 
 const Feed = ({ topic }: FeedProps) => {
-  const { data, error } = !topic
+  const { data, error: _ } = !topic
     ? useQuery(GET_ALL_POSTS)
     : useQuery(GET_ALL_POST_BY_TOPIC, { variables: { topic } });
-
-  console.log(data, error);
 
   const posts: Post[] = !topic ? data?.getPostList : data?.getPostListByTopic;
 
