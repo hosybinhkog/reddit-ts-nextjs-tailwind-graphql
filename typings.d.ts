@@ -1,4 +1,4 @@
-type Comment = {
+type Comment1 = {
   created_at: string;
   id: number;
   post_id: number;
@@ -29,6 +29,6 @@ type Post = {
   title: string;
   username: string;
   votes: Vote[];
-  comment: Comment[];
+  comment: Comment1[];
   subreddit: Subreddit[];
 };

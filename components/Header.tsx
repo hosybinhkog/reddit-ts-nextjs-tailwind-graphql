@@ -12,19 +12,22 @@ import {
   SpeakerphoneIcon,
   VideoCameraIcon,
 } from "@heroicons/react/outline";
+import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 const Header = () => {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 flex items-center px-4 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 flex items-center px-4 bg-white shadow-sm py-2">
       <div className="relative h-10 w-20 cursor-pointer flex-shrink-0">
-        <Image
-          objectFit="contain"
-          src="https://links.papareact.com/fqy"
-          layout="fill"
-        />
+        <Link href="/">
+          <Image
+            objectFit="contain"
+            src="https://links.papareact.com/fqy"
+            layout="fill"
+          />
+        </Link>
       </div>
       <div className="flex items-center mx-7 xl:min-w-[300px]">
         <HomeIcon className="h-5 w-5" />
